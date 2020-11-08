@@ -54,17 +54,17 @@ public class DemoApplication  implements CommandLineRunner {
 		PermissionEntity perUpdate = new PermissionEntity();
 		PermissionEntity perDelete = new PermissionEntity();
 
-		perRead.setName("Read");
+		perRead.setName("READ");
 		perRead.setPermissionPubId(utils.generatePubId(30));
 
 
-		perCreate.setName("Create");
+		perCreate.setName("CREATE");
 		perCreate.setPermissionPubId(utils.generatePubId(30));
 
-		perUpdate.setName("Update");
+		perUpdate.setName("UPDATE");
 		perUpdate.setPermissionPubId(utils.generatePubId(30));
 
-		perDelete.setName("Delete");
+		perDelete.setName("DELETE");
 		perDelete.setPermissionPubId(utils.generatePubId(30));
 
 		permissionRepository.saveAll(Arrays.asList(perRead, perCreate,perUpdate,perDelete));

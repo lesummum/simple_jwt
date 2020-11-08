@@ -3,17 +3,20 @@ package com.simplejwt.demo.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simplejwt.demo.bll.UserService;
+import com.simplejwt.demo.bll.UserServiceImp;
 import com.simplejwt.demo.dal.SpringApplicationContext;
 import com.simplejwt.demo.dtos.UserDto;
 import com.simplejwt.demo.dtos.UserLoginRequestModel;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -57,8 +60,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             Authentication auth) throws IOException, ServletException {
         String userName = ((User) auth.getPrincipal()).getUsername();
 
-        String token = Jwts.builder().setSubject(userName).setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET).compact();
+        String token = Jwts.builder()
+                .setSubject(userName)
+                .claim("authorities", auth.getAuthorities())
+                .setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
+                .compact();
         UserService userService = (UserService) SpringApplicationContext.getBean("userServiceImp");
         UserDto userDto= userService.getUser(userName);
 

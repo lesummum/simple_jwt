@@ -13,11 +13,14 @@ import java.util.List;
 public interface PermissionRepository extends CrudRepository<PermissionEntity, Integer> {
     @Query("SELECT p " +
             "FROM PermissionEntity p " +
-            "join p.roles pr on p.id = pr.id " +
+            "inner join p.roles pr " +
             "where pr.id = :role_id")
     List<PermissionEntity> getPermissionIdByRoleId(@Param("role_id") int role_id);
 
     PermissionEntity findByPermissionPubId(String permissionPubId);
     PermissionEntity findByName(String name);
-
+           // "SELECT p " +
+           // "FROM PermissionEntity p " +
+           // "join p.roles pr on p.id = pr.id " +
+           // "where pr.id = :role_id"
 }

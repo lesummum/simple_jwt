@@ -1,10 +1,12 @@
 package com.simplejwt.demo.bll;
 
 import com.simplejwt.demo.bll.tools.Utils;
+import com.simplejwt.demo.dal.PermissionRepository;
 import com.simplejwt.demo.dal.RoleRepository;
 import com.simplejwt.demo.dal.UserRepository;
 import com.simplejwt.demo.dtos.UserDetailsUpdate;
 import com.simplejwt.demo.dtos.UserDto;
+import com.simplejwt.demo.models.PermissionEntity;
 import com.simplejwt.demo.models.UserEntity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,6 +32,8 @@ public class UserServiceImp implements UserService{
     UserRepository userRepository;
     @Autowired
     RoleRepository roleRepository;
+    @Autowired
+    PermissionRepository permissionRepository;
     @Autowired
     Utils utils;
 
@@ -128,9 +133,18 @@ public class UserServiceImp implements UserService{
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        List<SimpleGrantedAuthority> authorities= new ArrayList<>();
         UserEntity userEntity = userRepository.findByEmail(email);
         if(userEntity == null) throw new UsernameNotFoundException(email);
 
-        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), new ArrayList<>());
+        //get roleId of user
+
+        int userRoleId = userEntity.getRole().getId();
+        // select all permission from table ManyToMany where roleId
+        List<PermissionEntity>  allPermissionsForThisUser = permissionRepository.getPermissionIdByRoleId(userRoleId);
+        for (PermissionEntity permission : allPermissionsForThisUser) {
+          authorities.add(new SimpleGrantedAuthority(permission.getName()));
+        }
+        return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), authorities);
     }
 }
